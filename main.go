@@ -61,7 +61,7 @@ func updateStatus(s *discordgo.Session) {
 	s.UpdateStatus(0, fmt.Sprintf("with %d searches", len(trappers)))
 }
 
-func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
+func onMessageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	// fmt.Printf("id=(%s) name=(%s) apiname=(%s)\n", m.Emoji.ID, m.Emoji.Name, m.Emoji.APIName())
 	if m.UserID == s.State.User.ID || m.Emoji.Name != redoEmoji {
 		return
@@ -70,7 +70,7 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	// s.MessageReactionRemove(m.ChannelID, m.MessageID, m.Emoji.Name, m.UserID)
 }
 
-func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
+func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID || !strings.HasPrefix(m.Content, prefix) {
 		return
 	}
@@ -145,6 +145,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
+func onReady(s *discordgo.Session, r *discordgo.Ready) {
+	// https://discordapp.com/developers/docs/topics/gateway#resuming
+	updateStatus(s)
+}
+
 func main() {
 	rand.Seed(time.Now().Unix())
 	loadTrappers()
@@ -165,16 +170,15 @@ func main() {
 		return
 	}
 
-	dg.AddHandler(messageCreate)
-	dg.AddHandler(messageReactionAdd)
+	dg.AddHandler(onReady)
+	dg.AddHandler(onMessageCreate)
+	dg.AddHandler(onMessageReactionAdd)
 
 	err = dg.Open()
 	if err != nil {
 		fmt.Println("error opening connection,", err)
 		return
 	}
-
-	updateStatus(dg)
 
 	fmt.Println("Bot is now running.  Press CTRL+C to exit.")
 	sc := make(chan os.Signal, 1)
