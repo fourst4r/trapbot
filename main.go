@@ -11,13 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/agnivade/levenshtein"
 	"github.com/bwmarrin/discordgo"
-	pq "github.com/jupp0r/go-priority-queue"
 )
 
 const (
-	token        = "NjEwMzUyODUxMTMwMTIyMjYx.XVEDGw.AeQ2tTnpKJmF3ghWK8-OoHAbEtg"
 	editorID     = "254635501074513920"
 	trappersFile = "trappers.txt"
 	prefix       = "!"
@@ -33,7 +30,8 @@ func saveTrappers() {
 	data := strings.Join(trappers, "\r\n")
 	err := ioutil.WriteFile(trappersFile, []byte(data), 0)
 	if err != nil {
-		panic(err)
+		fmt.Println("error writing to trappers.txt,", err)
+		return
 	}
 }
 
@@ -134,45 +132,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
-	case "search":
-		name := strings.Join(args, " ")
-		if len(name) > 20 {
-			s.ChannelMessageSend(m.ChannelID, failureEmoji+"search too long")
-			return
-		}
-		if len(name) == 0 {
-			s.ChannelMessageSend(m.ChannelID, failureEmoji+"search too short")
-			return
-		}
-		const maxMatches = 5
-		var matches []string
-		q := pq.New()
-		for _, trapper := range trappers {
-			if true || strings.ToLower(trapper) == strings.ToLower(name) {
-				dist := levenshtein.ComputeDistance(strings.ToLower(trapper), strings.ToLower(name))
-				q.Insert(trapper, float64(dist))
-
-				// matches = append(matches, trapper)
-				// if len(matches) == maxMatches {
-				// 	break
-				// }
-			}
-		}
-		if false && len(matches) == 0 {
-			s.ChannelMessageSend(m.ChannelID, "no matches found")
-		} else {
-			for i := 0; i < 5; i++ {
-				match, err := q.Pop()
-				if err != nil {
-					break
-				}
-				matches = append(matches, match.(string))
-			}
-			s.ChannelMessageSend(m.ChannelID, strings.Join(matches, ", "))
-		}
 	case "list":
 		file, err := os.Open(trappersFile)
 		if err != nil {
+			fmt.Println("error opening trappers.txt,", err)
 			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 			return
 		}
@@ -186,7 +149,17 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	loadTrappers()
 
-	dg, err := discordgo.New("Bot " + token)
+	file, err := os.Open("token.txt")
+	if err != nil {
+		fmt.Println("error reading token.txt,", err)
+		return
+	}
+	tokenBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	dg, err := discordgo.New("Bot " + string(tokenBytes))
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
 		return
@@ -201,7 +174,7 @@ func main() {
 		return
 	}
 
-	dg.UpdateStatus(0, fmt.Sprintf("with %d searches", len(trappers)))
+	updateStatus(dg)
 
 	fmt.Println("Bot is now running.  Press CTRL+C to exit.")
 	sc := make(chan os.Signal, 1)
