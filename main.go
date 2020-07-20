@@ -23,6 +23,7 @@ const (
 	failureEmoji = "❗"
 )
 
+// cache of trappersFile
 var trappers []string
 
 func saveTrappers() {
@@ -30,7 +31,7 @@ func saveTrappers() {
 	data := strings.Join(trappers, "\r\n")
 	err := ioutil.WriteFile(trappersFile, []byte(data), 0)
 	if err != nil {
-		fmt.Println("error writing to trappers.txt,", err)
+		fmt.Println("error writing to trappers file:", err)
 		return
 	}
 }
@@ -44,6 +45,7 @@ func loadTrappers() {
 	if err != nil {
 		panic(err)
 	}
+
 	trappers = strings.Split(string(data), "\r\n")
 }
 
@@ -135,7 +137,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	case "list":
 		file, err := os.Open(trappersFile)
 		if err != nil {
-			fmt.Println("error opening trappers.txt,", err)
+			fmt.Println("error opening trappers file:", err)
 			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 			return
 		}
@@ -156,8 +158,7 @@ func main() {
 
 	file, err := os.Open("token.txt")
 	if err != nil {
-		fmt.Println("error reading token.txt,", err)
-		return
+		panic(err)
 	}
 	tokenBytes, err := ioutil.ReadAll(file)
 	if err != nil {
@@ -166,8 +167,7 @@ func main() {
 
 	dg, err := discordgo.New("Bot " + string(tokenBytes))
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
-		return
+		panic(err)
 	}
 
 	dg.AddHandler(onReady)
@@ -176,11 +176,10 @@ func main() {
 
 	err = dg.Open()
 	if err != nil {
-		fmt.Println("error opening connection,", err)
-		return
+		panic(err)
 	}
 
-	fmt.Println("Bot is now running.  Press CTRL+C to exit.")
+	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
