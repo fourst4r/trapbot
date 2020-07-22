@@ -47,15 +47,32 @@ func findUnbeaten(players []string) ([]string, error) {
 		fmt.Println("No data found.")
 	} else {
 		wantRanges := []string{fmt.Sprintf(readRange, 1, 1)}
+		found := []string{}
 		for i, row := range resp.Values {
 			if len(row) > 0 {
 				for _, player := range players {
 					if strings.ToLower(player) == strings.ToLower(row[0].(string)) {
 						// fmt.Printf("%d: %s\n", i+2, row[0])
+						found = append(found, player)
 						wantRanges = append(wantRanges, fmt.Sprintf(readRange, i+2, i+2))
 					}
 				}
 			}
+		}
+		if len(found) != len(players) {
+			notfound := []string{}
+			for _, p := range players {
+				missing := true
+				for _, f := range found {
+					if strings.ToLower(p) == strings.ToLower(f) {
+						missing = false
+					}
+				}
+				if missing {
+					notfound = append(notfound, p)
+				}
+			}
+			return nil, fmt.Errorf("the following names were not found on the spreadsheet: %s", strings.Join(notfound, ", "))
 		}
 		// fmt.Println("rangesnym:", len(wantRanges))
 		resp, err := srv.Spreadsheets.Values.BatchGet(spreadsheetID).Ranges(wantRanges...).Do()

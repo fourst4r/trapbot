@@ -155,8 +155,9 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		unbeaten, err := findUnbeaten(strings.Split(rest, ","))
 		if err != nil {
-			fmt.Println("error opening trappers file:", err)
-			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+			fmt.Println("err finding unbeaten:", err)
+			s.ChannelMessageSend(m.ChannelID, err.Error())
+			// s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 			return
 		}
 		content := strings.Join(unbeaten, ", ")
