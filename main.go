@@ -77,11 +77,17 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	split := strings.Split(m.Content[len(prefix):], " ")
-	command := split[0]
-	var args []string
+	// split := strings.Split(m.Content[len(prefix):], " ")
+	// command := split[0]
+	// var args []string
+	// if len(split) > 1 {
+	// args = split[1:]
+	// }
+	split := strings.SplitN(m.Content[len(prefix):], " ", 2)
+	command, rest, args := split[0], "", []string{}
 	if len(split) > 1 {
-		args = split[1:]
+		rest = split[1]
+		args = strings.Split(rest, " ")
 	}
 
 	fmt.Printf("command=%s args=%v\n", command, args)
@@ -99,7 +105,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID != editorID {
 			return
 		}
-		name := strings.Join(args, " ")
+		name := rest //strings.Join(args, " ")
 		for _, trapper := range trappers {
 			if strings.ToLower(trapper) == strings.ToLower(name) {
 				s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
@@ -114,7 +120,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID != editorID {
 			return
 		}
-		name := strings.Join(args, " ")
+		name := rest //strings.Join(args, " ")
 		for i, trapper := range trappers {
 			if strings.ToLower(trapper) == strings.ToLower(name) {
 				trappers = append(trappers[:i], trappers[i+1:]...)
@@ -126,7 +132,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 	case "has":
-		name := strings.Join(args, " ")
+		name := rest //strings.Join(args, " ")
 		for _, trapper := range trappers {
 			if strings.ToLower(trapper) == strings.ToLower(name) {
 				s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
@@ -142,8 +148,28 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		s.ChannelFileSend(m.ChannelID, trappersFile, file)
+	case "at":
+		if m.ChannelID != "487193614598930447" {
+			s.ChannelMessageSend(m.ChannelID, "This command is spammy, use #bot")
+			return
+		}
+		unbeaten, err := findUnbeaten(strings.Split(rest, ","))
+		if err != nil {
+			fmt.Println("error opening trappers file:", err)
+			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+			return
+		}
+		content := strings.Join(unbeaten, ", ")
+		if len(content) > 2000 {
+			content = content[:1997] + "..."
+		}
+		_, err = s.ChannelMessageSend(m.ChannelID, content)
+		if err != nil {
+			fmt.Println(err)
+		}
+		// fmt.Println("unbeaten:", unbeaten)
 	case "help":
-		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list`)
+		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>`)
 	}
 }
 
@@ -155,6 +181,7 @@ func onReady(s *discordgo.Session, r *discordgo.Ready) {
 func main() {
 	rand.Seed(time.Now().Unix())
 	loadTrappers()
+	initSheets()
 
 	file, err := os.Open("token.txt")
 	if err != nil {
