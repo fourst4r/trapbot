@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -157,18 +158,17 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			fmt.Println("err finding unbeaten:", err)
 			s.ChannelMessageSend(m.ChannelID, err.Error())
-			// s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 			return
 		}
 		content := strings.Join(unbeaten, ", ")
 		if len(content) > 2000 {
-			content = content[:1997] + "..."
+			// content = content[:1997] + "..."
+			var buf bytes.Buffer
+			buf.WriteString(strings.Join(unbeaten, "\r\n"))
+			s.ChannelFileSend(m.ChannelID, "unbeaten.txt", &buf)
+		} else {
+			s.ChannelMessageSend(m.ChannelID, content)
 		}
-		_, err = s.ChannelMessageSend(m.ChannelID, content)
-		if err != nil {
-			fmt.Println(err)
-		}
-		// fmt.Println("unbeaten:", unbeaten)
 	case "help":
 		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>`)
 	}

@@ -30,14 +30,11 @@ var (
 		"Obstacle: Tib's Quiz",
 		"Lost Island [!]",
 		"E-GIRLS",
+		"Ande's AT Quiz",
 	}
 )
 
 func findUnbeaten(players []string) ([]string, error) {
-	// Prints the names and majors of students in a sample spreadsheet:
-	// https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-	// spreadsheetId := "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms"
-	// readRange := "Class Data!A2:E"
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, playerRange).Do()
 	if err != nil {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
@@ -72,9 +69,9 @@ func findUnbeaten(players []string) ([]string, error) {
 					notfound = append(notfound, p)
 				}
 			}
-			return nil, fmt.Errorf("the following names were not found on the spreadsheet: %s", strings.Join(notfound, ", "))
+			return nil, fmt.Errorf("the following names were not found on the spreadsheet: %s.\n<https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing>", strings.Join(notfound, ", "))
 		}
-		// fmt.Println("rangesnym:", len(wantRanges))
+
 		resp, err := srv.Spreadsheets.Values.BatchGet(spreadsheetID).Ranges(wantRanges...).Do()
 		if err != nil {
 			return nil, err
