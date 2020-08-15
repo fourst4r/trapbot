@@ -31,6 +31,7 @@ var (
 		"Lost Island [!]",
 		"E-GIRLS",
 		"Ande's AT Quiz",
+		"Ancient City Trial",
 	}
 )
 
