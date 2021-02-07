@@ -24,6 +24,19 @@ const (
 	failureEmoji = "❗"
 )
 
+var freeAlts = []string{
+	"Abstraction",
+	"Shattered Remains",
+	"Free",
+	"FreeRemains",
+	"TrapperBob",
+	"SeasonWork",
+	"Popeye",
+	"WaffleWork",
+	"Lord of the Traps",
+	"Recovered",
+}
+
 // cache of trappersFile
 var trappers []string
 
@@ -94,13 +107,20 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	fmt.Printf("command=%s args=%v\n", command, args)
 	switch command {
 	case "pick":
-		msg, err := s.ChannelMessageSend(m.ChannelID, randomTrapper())
+		trapper := randomTrapper()
+		msg, err := s.ChannelMessageSend(m.ChannelID, trapper)
 		if err != nil {
 			panic(err)
 		}
 		err = s.MessageReactionAdd(msg.ChannelID, msg.ID, redoEmoji)
 		if err != nil {
 			panic(err)
+		}
+		for _, alt := range freeAlts {
+			if strings.EqualFold(trapper, alt) {
+				s.MessageReactionAdd(msg.ChannelID, msg.ID, "🆓")
+				break
+			}
 		}
 	case "add":
 		if m.Author.ID != editorID {

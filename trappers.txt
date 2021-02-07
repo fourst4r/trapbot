@@ -117,6 +117,7 @@ Felpastian
 Firestar2000
 FrankenFreak
 Free
+FreeRemains
 Frenchy309
 Frozen Warrior
 G*Eclipse2
@@ -171,6 +172,7 @@ Liion
 Limewire
 Linq
 Lord Vadar
+Lord of the Traps
 Ludox Inc.
 LuiS mOnA
 Machiavelli
@@ -213,12 +215,14 @@ Peter Pilsner
 Photon.
 Pink Panther 999
 Poisonous Apple
+Popeye
 Prince Ande
 Prince Legacy
 Project46
 R-R-Ryan
 RSFreak
 Rank0Crown
+Recovered
 Red-E
 Reduance
 Relampago...
@@ -234,6 +238,7 @@ SKILLzXD
 Saturn Storm
 Scepto
 Schtekarn
+SeasonWork
 Sensitivity
 Serenity Dragon
 ShadowTrix
@@ -262,6 +267,7 @@ Thousand Hands
 Tib
 Toxic Titan
 TrapCrew
+TrapperBob
 Trapw
 Trophy435
 Twashere
@@ -272,8 +278,10 @@ Undead Angel
 UndeadAngelX
 Underestimated
 Underfiend
+Undisputed
 Vegetables
 Vipa
+WaffleWork
 WarpX
 White Clouds
 White Dragon Origins

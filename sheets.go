@@ -18,100 +18,159 @@ import (
 
 const (
 	spreadsheetID = "1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo"
-	playerRange   = "Trap Trial!B2:B"
-	readRange     = "Trap Trial!D%d:%d"
+	playerRange   = "Trap Trial!B2:D"
+	// teamRange     = "Trap Trial!D2:D"
+	readRange = "Trap Trial!E%d:%d"
+	// redRanges = "{'Trap Trial'!D%d:LB,'Trap Trial'!LF%d:LJ,'Trap Trial'!LN%d:LP,'Trap Trial'!LT%d:LW}"
+	// blueRange = "Trap Trial!D%d:%d"
 )
 
 var (
+	// redRanges          = []string{"Trap Trial!D%d:LB", "Trap Trial!LF%d:LJ", "Trap Trial!LN%d:LP", "Trap Trial!LT%d:LW"}
+	// blueRanges         = []string{readRange}
+	redMaps            = []int{311, 312, 313, 319, 320, 321, 325, 326, 327, 331, 332, 333, 334}
+	blueMaps           = []int{314, 315, 316, 322, 323, 324, 328, 329, 330, 335, 336, 337, 338}
 	srv                *sheets.Service
 	spaceRgx           = regexp.MustCompile(`\s\s+`)
 	unbeatenExclusions = []string{
 		"Obstacle: Trapper Quiz",
 		"Obstacle: Tib's Quiz",
 		"Lost Island [!]",
-		"E-GIRLS",
+		"E-Girls // Models",
 		"Ande's AT Quiz",
 		"Ancient City Trial",
 	}
 )
 
 func findUnbeaten(players []string) ([]string, error) {
-	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, playerRange).Do()
+	playersResp, err := srv.Spreadsheets.Values.Get(spreadsheetID, playerRange).Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet: %v", err)
+		return nil, fmt.Errorf("unable to retrieve players from sheet: %v", err)
 	}
 
-	if len(resp.Values) == 0 {
-		fmt.Println("No data found.")
-	} else {
-		wantRanges := []string{fmt.Sprintf(readRange, 1, 1)}
-		found := []string{}
-		for i, row := range resp.Values {
-			if len(row) > 0 {
-				for _, player := range players {
-					if strings.ToLower(player) == strings.ToLower(row[0].(string)) {
-						// fmt.Printf("%d: %s\n", i+2, row[0])
-						found = append(found, player)
-						wantRanges = append(wantRanges, fmt.Sprintf(readRange, i+2, i+2))
-					}
-				}
-			}
-		}
-		if len(found) != len(players) {
-			notfound := []string{}
-			for _, p := range players {
-				missing := true
-				for _, f := range found {
-					if strings.ToLower(p) == strings.ToLower(f) {
-						missing = false
-					}
-				}
-				if missing {
-					notfound = append(notfound, p)
-				}
-			}
-			return nil, fmt.Errorf("the following names were not found on the spreadsheet: %s.\n<https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing>", strings.Join(notfound, ", "))
-		}
+	// teamsResp, err := srv.Spreadsheets.Values.Get(spreadsheetID, teamRange)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("unable to retrieve teams from sheet: %v", err)
+	// }
+	// teams := make([]int, len(players))
 
-		resp, err := srv.Spreadsheets.Values.BatchGet(spreadsheetID).Ranges(wantRanges...).Do()
-		if err != nil {
-			return nil, err
-		}
-
-		unbeaten := []string{}
-		titles, ranges := resp.ValueRanges[0].Values[0], resp.ValueRanges[1:]
-		fmt.Println("titles:", len(titles))
-
-	colLoop:
-		for col := 0; col < len(titles); col++ {
-			beat := false
-			for _, valueRange := range ranges {
-				// fmt.Println("checking",i,"for ")
-				// if col < len(valueRange.Values[0]) {
-				// v := valueRange.Values[0][col]
-				// fmt.Printf("(%d) lvl: %s\n", i, v)
-				// }
-				if col < len(valueRange.Values[0]) && valueRange.Values[0][col].(string) != "" {
-					beat = true
-					break
-				}
-			}
-			if !beat {
-				title := titles[col].(string)
-				// spaces are used in between words to force them on the next line so fix that
-				title = spaceRgx.ReplaceAllString(title, " ")
-				for _, exclusion := range unbeatenExclusions {
-					if title == exclusion {
-						continue colLoop
+	wantRanges := []string{fmt.Sprintf(readRange, 1, 1)}
+	// wantRows := []int{}
+	found := []string{}
+	var hasRed, hasBlue bool
+	for i, row := range playersResp.Values {
+		if len(row) > 0 {
+			// fmt.Println("row:", row)
+			for _, player := range players {
+				if strings.ToLower(player) == strings.ToLower(row[0].(string)) {
+					// fmt.Printf("%d: %s\n", i+2, row[0])
+					found = append(found, player)
+					// wantRows = append(wantRows, i+2)
+					wantRanges = append(wantRanges, fmt.Sprintf(readRange, i+2, i+2))
+					switch row[2] {
+					case "R":
+						hasRed = true
+					case "B":
+						hasBlue = true
 					}
+
 				}
-				unbeaten = append(unbeaten, title)
 			}
 		}
-		return unbeaten, nil
+	}
+	// for _, rowIdx := range wantRows {
+	// 	if hasRed && !hasBlue {
+	// 		for _, rge := range redRanges {
+	// 			wantRanges = append(wantRanges, fmt.Sprintf(rge, rowIdx))
+	// 		}
+	// 	} else if hasBlue && !hasRed {
+	// 		for _, rge := range blueRanges {
+	// 			wantRanges = append(wantRanges, fmt.Sprintf(rge, rowIdx))
+	// 		}
+	// 	} else {
+	// 		wantRanges = append(wantRanges, fmt.Sprintf(readRange, rowIdx, rowIdx))
+	// 	}
+	// }
+
+	// fmt.Println("hasred:", hasRed)
+	// fmt.Println("hasblue:", hasBlue)
+	// fmt.Println("wantrages:", wantRanges)
+	if len(found) != len(players) {
+		notfound := []string{}
+		for _, p := range players {
+			missing := true
+			for _, f := range found {
+				if strings.ToLower(p) == strings.ToLower(f) {
+					missing = false
+				}
+			}
+			if missing {
+				notfound = append(notfound, p)
+			}
+		}
+		return nil, fmt.Errorf("the following names were not found on the spreadsheet: %s.\n<https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing>", strings.Join(notfound, ", "))
 	}
 
-	return []string{}, nil
+	resp, err := srv.Spreadsheets.Values.BatchGet(spreadsheetID).Ranges(wantRanges...).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	unbeaten := []string{}
+	titles, ranges := resp.ValueRanges[0].Values[0], resp.ValueRanges[1:]
+	// fmt.Println("teams:", ranges[0].Values[0][0])
+	fmt.Println("titles:", len(titles))
+
+colLoop:
+	for col := 0; col < len(titles); col++ {
+
+		// -4 because ABCD columns are not levels
+		if hasBlue && !hasRed {
+			for _, s := range redMaps {
+				if s-4 == col {
+					continue colLoop
+				}
+			}
+		} else if hasRed && !hasBlue {
+			for _, s := range blueMaps {
+				if s-4 == col {
+					continue colLoop
+				}
+			}
+		} else {
+			for _, s := range append(redMaps, blueMaps...) {
+				if s-4 == col {
+					continue colLoop
+				}
+			}
+		}
+
+		beat := false
+		for _, valueRange := range ranges {
+			// fmt.Println("checking",i,"for ")
+			// if col < len(valueRange.Values[0]) {
+			// v := valueRange.Values[0][col]
+			// fmt.Printf("(%d) lvl: %s\n", i, v)
+			// }
+
+			if col < len(valueRange.Values[0]) && valueRange.Values[0][col].(string) != "" {
+				beat = true
+				break
+			}
+		}
+		if !beat {
+			title := titles[col].(string)
+			// spaces are used in between words to force them on the next line so fix that
+			title = spaceRgx.ReplaceAllString(title, " ")
+			for _, exclusion := range unbeatenExclusions {
+				if title == exclusion {
+					continue colLoop
+				}
+			}
+			unbeaten = append(unbeaten, title)
+		}
+	}
+	return unbeaten, nil
 }
 
 func initSheets() {
