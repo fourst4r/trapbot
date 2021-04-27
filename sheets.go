@@ -39,6 +39,7 @@ var (
 		"E-Girls // Models",
 		"Ande's AT Quiz",
 		"Ancient City Trial",
+		"Addicted to Blue Cheese",
 	}
 )
 
@@ -67,11 +68,13 @@ func findUnbeaten(players []string) ([]string, error) {
 					found = append(found, player)
 					// wantRows = append(wantRows, i+2)
 					wantRanges = append(wantRanges, fmt.Sprintf(readRange, i+2, i+2))
-					switch row[2] {
-					case "R":
-						hasRed = true
-					case "B":
-						hasBlue = true
+					if len(row) > 2 {
+						switch row[2] {
+						case "R":
+							hasRed = true
+						case "B":
+							hasBlue = true
+						}
 					}
 
 				}
