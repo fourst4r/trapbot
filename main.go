@@ -35,6 +35,7 @@ var freeAlts = []string{
 	"WaffleWork",
 	"Lord of the Traps",
 	"Recovered",
+	"Killer",
 }
 
 // cache of trappersFile
