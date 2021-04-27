@@ -126,7 +126,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID != editorID {
 			return
 		}
-		name := rest //strings.Join(args, " ")
+		name := rest
 		for _, trapper := range trappers {
 			if strings.ToLower(trapper) == strings.ToLower(name) {
 				s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
@@ -141,7 +141,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if m.Author.ID != editorID {
 			return
 		}
-		name := rest //strings.Join(args, " ")
+		name := rest
 		for i, trapper := range trappers {
 			if strings.ToLower(trapper) == strings.ToLower(name) {
 				trappers = append(trappers[:i], trappers[i+1:]...)
@@ -153,7 +153,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 	case "has":
-		name := rest //strings.Join(args, " ")
+		name := rest
 		for _, trapper := range trappers {
 			if strings.ToLower(trapper) == strings.ToLower(name) {
 				s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
@@ -174,7 +174,11 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, "This command is spammy, use #bot")
 			return
 		}
-		unbeaten, err := findUnbeaten(strings.Split(rest, ","))
+		names := strings.Split(rest, ",")
+		for i := range names {
+			names[i] = strings.TrimSpace(names[i])
+		}
+		unbeaten, err := findUnbeaten(names)
 		if err != nil {
 			fmt.Println("err finding unbeaten:", err)
 			s.ChannelMessageSend(m.ChannelID, err.Error())
@@ -200,6 +204,7 @@ func onReady(s *discordgo.Session, r *discordgo.Ready) {
 }
 
 func main() {
+
 	rand.Seed(time.Now().Unix())
 	loadTrappers()
 	initSheets()
