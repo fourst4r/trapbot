@@ -185,7 +185,12 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			s.ChannelMessageSend(m.ChannelID, err.Error())
 			return
 		}
-		content := strings.Join(unbeaten, ", ")
+		var content string
+		if len(unbeaten) == 0 {
+			content = "no more maps to beat o_0"
+		} else {
+			content = strings.Join(unbeaten, ", ")
+		}
 		if len(content) > 2000 {
 			// content = content[:1997] + "..."
 			var buf bytes.Buffer

@@ -40,6 +40,7 @@ var (
 		"Ande's AT Quiz",
 		"Ancient City Trial",
 		"Addicted to Blue Cheese",
+		"Cheaterer!",
 	}
 )
 
