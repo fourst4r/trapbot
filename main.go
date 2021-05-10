@@ -16,30 +16,20 @@ import (
 )
 
 const (
-	editorID     = "254635501074513920"
-	trappersFile = "trappers.txt"
-	prefix       = "!"
-	redoEmoji    = "♻"
-	successEmoji = "☑"
-	failureEmoji = "❗"
+	editorID       = "254635501074513920"
+	ltgeneralID    = "449529653871247373"
+	trappersFile   = "trappers.txt"
+	exclusionsFile = "exclusions.txt"
+	freeFile       = "freealts.txt"
+	prefix         = "!"
+	redoEmoji      = "♻"
+	successEmoji   = "☑"
+	failureEmoji   = "❗"
 )
 
-var freeAlts = []string{
-	"Abstraction",
-	"Shattered Remains",
-	"Free",
-	"FreeRemains",
-	"TrapperBob",
-	"SeasonWork",
-	"Popeye",
-	"WaffleWork",
-	"Lord of the Traps",
-	"Recovered",
-	"Killer",
-}
-
-// cache of trappersFile
-var trappers []string
+var (
+	trappers, freeAlts, unbeatenExclusions []string
+)
 
 func saveTrappers() {
 	sort.Strings(trappers)
@@ -51,17 +41,24 @@ func saveTrappers() {
 	}
 }
 
-func loadTrappers() {
-	file, err := os.Open(trappersFile)
+func loadCfg() {
+	data, err := ioutil.ReadFile(trappersFile)
 	if err != nil {
 		panic(err)
 	}
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		panic(err)
-	}
-
 	trappers = strings.Split(string(data), "\r\n")
+
+	data, err = ioutil.ReadFile(exclusionsFile)
+	if err != nil {
+		panic(err)
+	}
+	unbeatenExclusions = strings.Split(string(data), "\r\n")
+
+	data, err = ioutil.ReadFile(freeFile)
+	if err != nil {
+		panic(err)
+	}
+	freeAlts = strings.Split(string(data), "\r\n")
 }
 
 func randomTrapper() string {
@@ -212,14 +209,10 @@ func onReady(s *discordgo.Session, r *discordgo.Ready) {
 func main() {
 
 	rand.Seed(time.Now().Unix())
-	loadTrappers()
+	loadCfg()
 	initSheets()
 
-	file, err := os.Open("token.txt")
-	if err != nil {
-		panic(err)
-	}
-	tokenBytes, err := ioutil.ReadAll(file)
+	tokenBytes, err := ioutil.ReadFile("token.txt")
 	if err != nil {
 		panic(err)
 	}
@@ -237,6 +230,29 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	go func() {
+		for t := range time.Tick(time.Minute) {
+			if dg == nil {
+				continue
+			}
+			// hh, mm, _ := t.UTC().Clock()
+			// fmt.Println(hh, mm, " on a ", t.UTC().Weekday())
+			if t.UTC().Weekday() == time.Monday {
+				h, m, _ := t.UTC().Clock()
+				if m == 10 {
+					switch h {
+					case 4:
+						dg.ChannelMessageSend(ltgeneralID, "ALORT! PR2 servers will restart in 2 hours!")
+					case 5:
+						dg.ChannelMessageSend(ltgeneralID, "ALORT! PR2 servers will restart in 1 hour!")
+					case 6:
+						dg.ChannelMessageSend(ltgeneralID, "ALORT! PR2 servers will restart in 10 minutes!")
+					}
+				}
+			}
+		}
+	}()
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)

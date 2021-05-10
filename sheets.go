@@ -28,20 +28,10 @@ const (
 var (
 	// redRanges          = []string{"Trap Trial!D%d:LB", "Trap Trial!LF%d:LJ", "Trap Trial!LN%d:LP", "Trap Trial!LT%d:LW"}
 	// blueRanges         = []string{readRange}
-	redMaps            = []int{311, 312, 313, 319, 320, 321, 325, 326, 327, 331, 332, 333, 334}
-	blueMaps           = []int{314, 315, 316, 322, 323, 324, 328, 329, 330, 335, 336, 337, 338}
-	srv                *sheets.Service
-	spaceRgx           = regexp.MustCompile(`\s\s+`)
-	unbeatenExclusions = []string{
-		"Obstacle: Trapper Quiz",
-		"Obstacle: Tib's Quiz",
-		"Lost Island [!]",
-		"E-Girls // Models",
-		"Ande's AT Quiz",
-		"Ancient City Trial",
-		"Addicted to Blue Cheese",
-		"Cheaterer!",
-	}
+	redMaps  = []int{311, 312, 313, 319, 320, 321, 325, 326, 327, 331, 332, 333, 334}
+	blueMaps = []int{314, 315, 316, 322, 323, 324, 328, 329, 330, 335, 336, 337, 338}
+	srv      *sheets.Service
+	spaceRgx = regexp.MustCompile(`\s\s+`)
 )
 
 func findUnbeaten(players []string) ([]string, error) {
@@ -50,14 +40,7 @@ func findUnbeaten(players []string) ([]string, error) {
 		return nil, fmt.Errorf("unable to retrieve players from sheet: %v", err)
 	}
 
-	// teamsResp, err := srv.Spreadsheets.Values.Get(spreadsheetID, teamRange)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("unable to retrieve teams from sheet: %v", err)
-	// }
-	// teams := make([]int, len(players))
-
 	wantRanges := []string{fmt.Sprintf(readRange, 1, 1)}
-	// wantRows := []int{}
 	found := []string{}
 	var hasRed, hasBlue bool
 	for i, row := range playersResp.Values {
@@ -82,23 +65,7 @@ func findUnbeaten(players []string) ([]string, error) {
 			}
 		}
 	}
-	// for _, rowIdx := range wantRows {
-	// 	if hasRed && !hasBlue {
-	// 		for _, rge := range redRanges {
-	// 			wantRanges = append(wantRanges, fmt.Sprintf(rge, rowIdx))
-	// 		}
-	// 	} else if hasBlue && !hasRed {
-	// 		for _, rge := range blueRanges {
-	// 			wantRanges = append(wantRanges, fmt.Sprintf(rge, rowIdx))
-	// 		}
-	// 	} else {
-	// 		wantRanges = append(wantRanges, fmt.Sprintf(readRange, rowIdx, rowIdx))
-	// 	}
-	// }
 
-	// fmt.Println("hasred:", hasRed)
-	// fmt.Println("hasblue:", hasBlue)
-	// fmt.Println("wantrages:", wantRanges)
 	if len(found) != len(players) {
 		notfound := []string{}
 		for _, p := range players {
