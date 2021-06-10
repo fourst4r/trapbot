@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
@@ -42,23 +43,32 @@ func saveTrappers() {
 }
 
 func loadCfg() {
+	splitLines := func(b []byte) []string {
+		var lines []string
+		sc := bufio.NewScanner(bytes.NewBuffer(b))
+		for sc.Scan() {
+			lines = append(lines, sc.Text())
+		}
+		return lines
+	}
+
 	data, err := ioutil.ReadFile(trappersFile)
 	if err != nil {
 		panic(err)
 	}
-	trappers = strings.Split(string(data), "\r\n")
+	trappers = splitLines(data)
 
 	data, err = ioutil.ReadFile(exclusionsFile)
 	if err != nil {
 		panic(err)
 	}
-	unbeatenExclusions = strings.Split(string(data), "\r\n")
+	unbeatenExclusions = splitLines(data)
 
 	data, err = ioutil.ReadFile(freeFile)
 	if err != nil {
 		panic(err)
 	}
-	freeAlts = strings.Split(string(data), "\r\n")
+	freeAlts = splitLines(data)
 }
 
 func randomTrapper() string {
@@ -176,6 +186,9 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for i := range names {
 			names[i] = strings.TrimSpace(names[i])
 		}
+		if len(names[0]) == 0 {
+			names[0] = m.Member.Nick
+		}
 		unbeaten, err := findUnbeaten(names)
 		if err != nil {
 			fmt.Println("err finding unbeaten:", err)
@@ -196,8 +209,12 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			s.ChannelMessageSend(m.ChannelID, content)
 		}
+	case "docs":
+		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			Description: "[AT information](https://docs.google.com/document/d/16vwNMfUOGWEGRDTV6IjM_QeeAM5Uh3QXgTVQ6vi0w5w/edit?usp=sharing) // [AT leaderboard](https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing)",
+		})
 	case "help":
-		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>`)
+		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>, !docs`)
 	}
 }
 
@@ -236,20 +253,23 @@ func main() {
 			if dg == nil {
 				continue
 			}
-			// hh, mm, _ := t.UTC().Clock()
-			// fmt.Println(hh, mm, " on a ", t.UTC().Weekday())
 			if t.UTC().Weekday() == time.Monday {
 				h, m, _ := t.UTC().Clock()
-				if m == 10 {
-					switch h {
-					case 4:
-						dg.ChannelMessageSend(ltgeneralID, "ALORT! PR2 servers will restart in 2 hours!")
-					case 5:
-						dg.ChannelMessageSend(ltgeneralID, "ALORT! PR2 servers will restart in 1 hour!")
-					case 6:
-						dg.ChannelMessageSend(ltgeneralID, "ALORT! PR2 servers will restart in 10 minutes!")
+				switch h {
+				case 4:
+					if m == 10 {
+						dg.ChannelMessageSend(ltgeneralID, "🥲 ALORT! PR2 servers will restart in 2 hours!")
+					}
+				case 5:
+					if m == 10 {
+						dg.ChannelMessageSend(ltgeneralID, "<:PepeSad:496929351179436032> ALORT! PR2 servers will restart in 1 hour!")
+					}
+				case 6:
+					if m == 0 {
+						dg.ChannelMessageSend(ltgeneralID, "<:PepeKMS:748576081967317063> ALORT! PR2 servers will restart in 10 minutes!")
 					}
 				}
+
 			}
 		}
 	}()
