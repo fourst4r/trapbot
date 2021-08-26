@@ -14,6 +14,7 @@
 -ProMan-
 -Shadowfax-
 -SteelSoldier-
+-Yolex-
 .;Icey;.
 .Aries.
 .Clutch.
@@ -31,6 +32,7 @@ Agent Trix
 Alba-666
 Albatross
 AlphaZ
+Ande
 Angelopolus
 Anton.
 Apex Traps
@@ -48,12 +50,15 @@ AxeRebellion
 Azizova
 Baconism
 Battle Hawk
+Beelzebub
 Bigbanglol1
 Birdog
 BlueYeti
 Bmx Kungen
 Brandon Hunter
+Bree
 Bubbel Doge
+Burger
 Century
 Cerium
 ChampionerX2
@@ -68,6 +73,7 @@ Compression+
 Cookie:)
 Cookiie
 Cornectarine
+Corpse Husband
 Cosintino
 Critters
 Crown hat 10
@@ -86,6 +92,7 @@ Devious Bacon*
 Devious Chrome
 Devious Dragon
 Devious Easy
+Devious Furious
 Devious Hard
 Devious Ocelot
 Devious Scorpion
@@ -101,13 +108,16 @@ Eagle of Light
 ElatedFiend
 Emppy
 Emub
+Endeavor
 Equinox(Unleashed)
 Ethan7272
 ExTTreme
 Exp Member
 ExplosionZ
+FJD
 Fadious Dragon
 Fallen Warrior
+Family
 Fatal Dragon
 Fatal Shadow X
 FatalGlory
@@ -121,16 +131,20 @@ FreeRemains
 Frenchy309
 Frozen Warrior
 G*Eclipse2
+Genial Skygge
 Genius Shadow
 Glitch Racer
 Grievance
 Grim Ripper1
+Gun Glitch
 H.B.O
 HaquaZ
 Holy Dragon
 Honor
 Hurto
 HydroCrystal
+IHaveDaCowboyz
+Iconoclast
 Inferno Dragon
 Inq
 Insanity X
@@ -142,11 +156,13 @@ J m i
 JSU x2
 Jake Dagger
 Jeffery
+Jhin
 Jonngog
 Joseph
 Jyu Viole Grace
 K0NR4D
 Karl gustav
+Katarina
 Kestucio
 Killer
 Kinx
@@ -159,9 +175,11 @@ LT Contest
 La Shay
 Legend Flame
 LegendOfShadow
+Legendary
 LegendaryCobra
 LegendaryDragon
 Leif
+Lektor Lort
 Lethal Dragon
 Lethal Warrior
 Levente77
@@ -171,6 +189,7 @@ Lich2
 Liion
 Limewire
 Linq
+Loggix
 Lord Vadar
 Lord of the Traps
 Ludox Inc.
@@ -183,6 +202,7 @@ MajorRacer
 Making History
 MasterLuke
 MidnightHeroes
+Mirrothical
 Molten9000
 Mr. Crown1
 Mr. Proximity
@@ -198,9 +218,11 @@ Nesfelle
 NeviaX
 NeviaX Jr.
 Nicacapo98
+Nightfall
 NinjaClones
 Nipples26
 Nogitsune
+Noobby
 Odin0030
 OforOrange
 Oingele
@@ -210,6 +232,7 @@ Oxygen Magnet
 Pahvipaa
 Panda
 Pano X
+Pastor Pis
 Perfectionist
 Peter Pilsner
 Photon.
@@ -229,11 +252,15 @@ Relampago...
 Remiscience
 Rennevia
 Rensje
+Resurrection
 Reversed
 Revuin
 RidePonyRide
 RoflKnife34
+Romen.
 Royal Flush
+Rutte
+Ryeiysku
 SKILLzXD
 Saturn Storm
 Scepto
@@ -252,6 +279,7 @@ SoulRipper
 Soulmiddes
 SoyaS
 Special Event
+Spiritual
 Spritual
 SwiftHawk
 TTnL
@@ -260,13 +288,17 @@ Tainted Soul
 Team Bunny
 TeamChromium
 TeamShadow
+Tejs
 Thanos.21r
 The Grazy
 TheDarkSide
 Thousand Hands
 Tib
+Tortank
 Toxic Titan
 TrapCrew
+Trapp Master
+TrapperBib
 TrapperBob
 Trapw
 Trophy435
@@ -280,6 +312,7 @@ Underestimated
 Underfiend
 Undisputed
 Vegetables
+Viking
 Vipa
 WaffleWork
 WarpX
@@ -292,7 +325,10 @@ XXXtremeXXX
 Xebra
 Xerothermic
 Xi Elite Ninja iX
+aab54
+agentabe007
 allegro di molto
+ansar-king
 aspectro
 bashy90
 beast31905
@@ -310,6 +346,7 @@ deoxys243
 dragon96
 el mejor soy
 feegs
+gabox301
 gangstar98
 halfcabby
 holyhell99
@@ -323,6 +360,7 @@ iTzFail
 iTzMexicoxD
 icecube606
 jani00
+janoo2000
 jeeTz
 jmarroqu
 jontttu
@@ -332,6 +370,7 @@ knc.2
 leonylyner
 lohlohloh
 luckeyross002
+luis16
 macroacc1
 mageslayer
 mt900
@@ -340,6 +379,7 @@ nicoxs123456
 octavioxx
 panos.21r
 patrolik
+pirrik
 piui
 proyecto x
 ptk94
@@ -357,6 +397,7 @@ taco2
 tronk7
 vampiruuu
 weilnayr
+xCeVeDz
 xCrunch
 ~Apocalyptic Dragon~
 ~Aquatic Dragon~

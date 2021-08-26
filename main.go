@@ -17,19 +17,20 @@ import (
 )
 
 const (
-	editorID       = "254635501074513920"
-	ltgeneralID    = "449529653871247373"
-	trappersFile   = "trappers.txt"
-	exclusionsFile = "exclusions.txt"
-	freeFile       = "freealts.txt"
-	prefix         = "!"
-	redoEmoji      = "♻"
-	successEmoji   = "☑"
-	failureEmoji   = "❗"
+	editorID         = "254635501074513920"
+	ltgeneralID      = "449529653871247373"
+	trappersFile     = "trappers.txt"
+	exclusionsATFile = "exclusionsat.txt"
+	exclusionsWPFile = "exclusionswp.txt"
+	freeFile         = "freealts.txt"
+	prefix           = "!"
+	redoEmoji        = "♻"
+	successEmoji     = "☑"
+	failureEmoji     = "❗"
 )
 
 var (
-	trappers, freeAlts, unbeatenExclusions []string
+	trappers, freeAlts, unbeatenExclusionsAT, unbeatenExclusionsWP []string
 )
 
 func saveTrappers() {
@@ -58,11 +59,17 @@ func loadCfg() {
 	}
 	trappers = splitLines(data)
 
-	data, err = ioutil.ReadFile(exclusionsFile)
+	data, err = ioutil.ReadFile(exclusionsATFile)
 	if err != nil {
 		panic(err)
 	}
-	unbeatenExclusions = splitLines(data)
+	unbeatenExclusionsAT = splitLines(data)
+
+	data, err = ioutil.ReadFile(exclusionsWPFile)
+	if err != nil {
+		panic(err)
+	}
+	unbeatenExclusionsWP = splitLines(data)
 
 	data, err = ioutil.ReadFile(freeFile)
 	if err != nil {
@@ -130,6 +137,72 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				break
 			}
 		}
+	case "has":
+		name := rest
+		for _, trapper := range trappers {
+			if strings.ToLower(trapper) == strings.ToLower(name) {
+				s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
+				return
+			}
+		}
+		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+	case "list":
+		file, err := os.Open(trappersFile)
+		if err != nil {
+			fmt.Println("error opening trappers file:", err)
+			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+			return
+		}
+		s.ChannelFileSend(m.ChannelID, trappersFile, file)
+	case "at", "wp":
+		if m.ChannelID != "487193614598930447" {
+			s.ChannelMessageSend(m.ChannelID, "This command is spammy, use #bot")
+			return
+		}
+		names := strings.Split(rest, ",")
+		for i := range names {
+			names[i] = strings.TrimSpace(names[i])
+		}
+		if len(names[0]) == 0 {
+			names[0] = m.Member.Nick
+		}
+		var at = command == "at"
+		var unbeaten []string
+		var err error
+		if at {
+			unbeaten, err = findUnbeatenAT(names)
+		} else {
+			unbeaten, err = findUnbeatenWP(names)
+		}
+		if err != nil {
+			fmt.Println("err finding unbeaten:", err)
+			s.ChannelMessageSend(m.ChannelID, err.Error())
+			return
+		}
+		var content string
+		if len(unbeaten) == 0 {
+			content = "no more maps to beat o_0"
+		} else {
+			content = strings.Join(unbeaten, ", ")
+		}
+		if len(content) > 2000 {
+			// content = content[:1997] + "..."
+			var buf bytes.Buffer
+			buf.WriteString(strings.Join(unbeaten, "\r\n"))
+			s.ChannelFileSend(m.ChannelID, "unbeaten.txt", &buf)
+		} else {
+			s.ChannelMessageSend(m.ChannelID, content)
+		}
+	case "doc":
+		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			Description: "[AT information](https://docs.google.com/document/d/16vwNMfUOGWEGRDTV6IjM_QeeAM5Uh3QXgTVQ6vi0w5w/edit?usp=sharing) // [AT leaderboard](https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing)\n" +
+				"[WP information](https://docs.google.com/document/d/1KJx5Pha-rf5aNmvDBV_n_O7JUu8AUZkmaeHIRACeoQ4/edit) // [WP leaderboard](https://docs.google.com/spreadsheets/d/1DTquUKV-ayLsKU64P9w9Lcs2oddDrpiGjcOfsKsPiYk/)",
+		})
+	case "help":
+		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>, !wp <name>,<name>, !doc`)
+	case "reload":
+		loadCfg()
+		s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
 	case "add":
 		if m.Author.ID != editorID {
 			return
@@ -160,61 +233,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
-	case "has":
-		name := rest
-		for _, trapper := range trappers {
-			if strings.ToLower(trapper) == strings.ToLower(name) {
-				s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
-				return
-			}
-		}
-		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
-	case "list":
-		file, err := os.Open(trappersFile)
-		if err != nil {
-			fmt.Println("error opening trappers file:", err)
-			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
-			return
-		}
-		s.ChannelFileSend(m.ChannelID, trappersFile, file)
-	case "at":
-		if m.ChannelID != "487193614598930447" {
-			s.ChannelMessageSend(m.ChannelID, "This command is spammy, use #bot")
-			return
-		}
-		names := strings.Split(rest, ",")
-		for i := range names {
-			names[i] = strings.TrimSpace(names[i])
-		}
-		if len(names[0]) == 0 {
-			names[0] = m.Member.Nick
-		}
-		unbeaten, err := findUnbeaten(names)
-		if err != nil {
-			fmt.Println("err finding unbeaten:", err)
-			s.ChannelMessageSend(m.ChannelID, err.Error())
-			return
-		}
-		var content string
-		if len(unbeaten) == 0 {
-			content = "no more maps to beat o_0"
-		} else {
-			content = strings.Join(unbeaten, ", ")
-		}
-		if len(content) > 2000 {
-			// content = content[:1997] + "..."
-			var buf bytes.Buffer
-			buf.WriteString(strings.Join(unbeaten, "\r\n"))
-			s.ChannelFileSend(m.ChannelID, "unbeaten.txt", &buf)
-		} else {
-			s.ChannelMessageSend(m.ChannelID, content)
-		}
-	case "docs":
-		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-			Description: "[AT information](https://docs.google.com/document/d/16vwNMfUOGWEGRDTV6IjM_QeeAM5Uh3QXgTVQ6vi0w5w/edit?usp=sharing) // [AT leaderboard](https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing)",
-		})
-	case "help":
-		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>, !docs`)
 	}
 }
 
