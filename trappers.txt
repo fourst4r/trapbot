@@ -1,6 +1,5 @@
 *Pancho*
 *Seraph*
---FLY--
 --LMFAO--
 -Ace Dragon-
 -Devious Best-
@@ -26,6 +25,7 @@
 AYR CAP
 AbsoluteZeroX
 Abstraction
+AbstractionR
 Aday31
 Addy888*
 Agent Trix
@@ -58,6 +58,7 @@ Bmx Kungen
 Brandon Hunter
 Bree
 Bubbel Doge
+Bubbel DogeR
 Burger
 Century
 Cerium
@@ -69,7 +70,6 @@ Cl@w
 CobraStriker
 Colind
 Colour Dragon
-Compression+
 Cookie:)
 Cookiie
 Cornectarine
@@ -78,7 +78,7 @@ Cosintino
 Critters
 Crown hat 10
 Curs3d
-DG Liion
+Curs3dR
 Dark Legion
 DarkReason
 DarkReason Jr.
@@ -87,13 +87,10 @@ Decyphr
 Defrain
 DemonFury
 Devious Angel X
-Devious Bacon
 Devious Bacon*
 Devious Chrome
 Devious Dragon
-Devious Easy
 Devious Furious
-Devious Hard
 Devious Ocelot
 Devious Scorpion
 Devious Shadows
@@ -106,6 +103,7 @@ Dropx
 Dusk
 Eagle of Light
 ElatedFiend
+Elhan7272
 Emppy
 Emub
 Endeavor
@@ -127,7 +125,9 @@ Felpastian
 Firestar2000
 FrankenFreak
 Free
+FreeR
 FreeRemains
+FreeRemainsR
 Frenchy309
 Frozen Warrior
 G*Eclipse2
@@ -135,12 +135,11 @@ Genial Skygge
 Genius Shadow
 Glitch Racer
 Grievance
-Grim Ripper1
 Gun Glitch
+Gun GlitchR
 H.B.O
 HaquaZ
 Holy Dragon
-Honor
 Hurto
 HydroCrystal
 IHaveDaCowboyz
@@ -165,6 +164,7 @@ Karl gustav
 Katarina
 Kestucio
 Killer
+KillerR
 Kinx
 Kira~
 Kraby1
@@ -172,6 +172,7 @@ Kussock
 LNosemd
 LP
 LT Contest
+LT ContestR
 La Shay
 Legend Flame
 LegendOfShadow
@@ -182,17 +183,17 @@ Leif
 Lektor Lort
 Lethal Dragon
 Lethal Warrior
-Levente77
 Liar
 Lich
 Lich2
 Liion
 Limewire
 Linq
+LinqR
 Loggix
 Lord Vadar
 Lord of the Traps
-Ludox Inc.
+Lord of the TrapsR
 LuiS mOnA
 Machiavelli
 Magnilonub
@@ -203,7 +204,6 @@ Making History
 MasterLuke
 MidnightHeroes
 Mirrothical
-Molten9000
 Mr. Crown1
 Mr. Proximity
 MrPlesn
@@ -213,14 +213,13 @@ N00B!
 Nadiasaurr
 NatheWane
 NeonStrike
-Nes25
+Nes95
 Nesfelle
 NeviaX
 NeviaX Jr.
 Nicacapo98
 Nightfall
 NinjaClones
-Nipples26
 Nogitsune
 Noobby
 Odin0030
@@ -246,6 +245,7 @@ R-R-Ryan
 RSFreak
 Rank0Crown
 Recovered
+RecoveredR
 Red-E
 Reduance
 Relampago...
@@ -266,10 +266,12 @@ Saturn Storm
 Scepto
 Schtekarn
 SeasonWork
+SeasonWorkR
 Sensitivity
 Serenity Dragon
 ShadowTrix
 Shattered Remains
+Shattered RemainsR
 Shosei~
 Skilledzz
 Snoop Liion
@@ -278,7 +280,6 @@ SosMula
 SoulRipper
 Soulmiddes
 SoyaS
-Special Event
 Spiritual
 Spritual
 SwiftHawk
@@ -286,7 +287,7 @@ TTnL
 Tabinho
 Tainted Soul
 Team Bunny
-TeamChromium
+Team Chromium
 TeamShadow
 Tejs
 Thanos.21r
@@ -296,10 +297,12 @@ Thousand Hands
 Tib
 Tortank
 Toxic Titan
+Trap ChallengeR
 TrapCrew
 Trapp Master
 TrapperBib
 TrapperBob
+TrapperBobR
 Trapw
 Trophy435
 Twashere
@@ -315,12 +318,13 @@ Vegetables
 Viking
 Vipa
 WaffleWork
+WaffleWorkR
 WarpX
 White Clouds
 White Dragon Origins
+Wholesome
 Wicked Angel
 X DragonZ X
-XD XD
 XXXtremeXXX
 Xebra
 Xerothermic
@@ -387,6 +391,7 @@ r3ino
 rangerbizz
 realjontttu
 rebut jr.
+ricaalarcon
 rocky-roy
 sam da penguin
 sebvf
@@ -399,15 +404,15 @@ vampiruuu
 weilnayr
 xCeVeDz
 xCrunch
+zfury
 ~Apocalyptic Dragon~
 ~Aquatic Dragon~
 ~BlackMagic~
 ~Falc~
-~Fate~
 ~LSD~
 ~Light2Shine~
 ~Mert~
 ~Stunt man~
 ~Team Cobra~
-~Team Fury~
+~TeamFury~
 ~Unknown~
