@@ -17,7 +17,6 @@ import (
 )
 
 const (
-	editorID         = "254635501074513920"
 	ltgeneralID      = "449529653871247373"
 	trappersFile     = "trappers.txt"
 	exclusionsATFile = "exclusionsat.txt"
@@ -31,6 +30,10 @@ const (
 
 var (
 	trappers, freeAlts, unbeatenExclusionsAT, unbeatenExclusionsWP []string
+	editorID                                                       = []string{
+		"254635501074513920", // oxy
+		"268870756862001153", // mag
+	}
 )
 
 func saveTrappers() {
@@ -78,6 +81,15 @@ func loadCfg() {
 	freeAlts = splitLines(data)
 }
 
+func isEditor(id string) bool {
+	for _, eid := range editorID {
+		if id == eid {
+			return true
+		}
+	}
+	return false
+}
+
 func randomTrapper() string {
 	return escapeFormatting(trappers[rand.Intn(len(trappers))])
 }
@@ -106,12 +118,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	// split := strings.Split(m.Content[len(prefix):], " ")
-	// command := split[0]
-	// var args []string
-	// if len(split) > 1 {
-	// args = split[1:]
-	// }
 	split := strings.SplitN(m.Content[len(prefix):], " ", 2)
 	command, rest, args := split[0], "", []string{}
 	if len(split) > 1 {
@@ -205,7 +211,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		loadCfg()
 		s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
 	case "add":
-		if m.Author.ID != editorID {
+		if !isEditor(m.Author.ID) {
 			return
 		}
 		name := rest
@@ -220,7 +226,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		saveTrappers()
 		s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
 	case "remove":
-		if m.Author.ID != editorID {
+		if !isEditor(m.Author.ID) {
 			return
 		}
 		name := rest
