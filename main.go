@@ -3,10 +3,14 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"os/exec"
 	"os/signal"
 	"sort"
 	"strings"
@@ -127,6 +131,71 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	fmt.Printf("command=%s args=%v\n", command, args)
 	switch command {
+	case "view":
+		pi, err := PlayerInfo(rest)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Error occurred fetching player info: `"+err.Error()+"`")
+			return
+		}
+		if !pi.Success {
+			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+			return
+		}
+		parts := [12]string{
+			pi.Hat, pi.HatColor, fmt.Sprint(pi.HatColor2),
+			pi.Head, pi.HeadColor, fmt.Sprint(pi.HeadColor2),
+			pi.Body, pi.BodyColor, fmt.Sprint(pi.BodyColor2),
+			pi.Feet, pi.FeetColor, fmt.Sprint(pi.FeetColor2),
+		}
+
+		file, err := generatePR2Avi(parts)
+		if err != nil {
+			fmt.Println("Error occurred generating avi: " + err.Error())
+		}
+		defer file.Close()
+
+		b, err := io.ReadAll(file)
+		if err != nil {
+			fmt.Println("Error occurred reading file: " + err.Error())
+		}
+
+		var group string = "???"
+		switch pi.Group {
+		case "0":
+			group = "Guest"
+		case "1":
+			group = "Member"
+		case "2":
+			group = "Mod"
+		case "3":
+			group = "Admin"
+		}
+		joined := time.Unix(pi.RegisterDate, 0).UTC().Format(time.RFC822)
+		active := time.Unix(pi.LoginDate, 0).UTC().Format(time.RFC822)
+		description := fmt.Sprintf("_%s_\n"+
+			"Group: %s\n"+
+			"Guild: %s\n"+
+			"Rank: %d\n"+
+			"Hats: %d\n"+
+			"Joined: %s\n"+
+			"Active: %s\n", pi.Status, group, pi.GuildName, pi.Rank, pi.Hats, joined, active)
+
+		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
+			Content: "",
+			Files: []*discordgo.File{
+				{
+					Name:        "avi.png",
+					ContentType: "image/png",
+					Reader:      bytes.NewBuffer(b),
+				},
+			},
+			Embed: &discordgo.MessageEmbed{
+				Title:       "-- " + pi.Name + " --",
+				Description: description,
+				Thumbnail:   &discordgo.MessageEmbedThumbnail{URL: "attachment://avi.png"},
+			},
+		})
+
 	case "pick":
 		trapper := randomTrapper()
 		msg, err := s.ChannelMessageSend(m.ChannelID, trapper)
@@ -136,7 +205,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		err = s.MessageReactionAdd(msg.ChannelID, msg.ID, redoEmoji)
 		if err != nil {
-			panic(err)
+			return
 		}
 		for _, alt := range freeAlts {
 			if strings.EqualFold(trapper, alt) {
@@ -147,7 +216,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	case "has":
 		name := rest
 		for _, trapper := range trappers {
-			if strings.ToLower(trapper) == strings.ToLower(name) {
+			if strings.EqualFold(trapper, name) {
 				s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
 				return
 			}
@@ -216,7 +285,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		name := rest
 		for _, trapper := range trappers {
-			if strings.ToLower(trapper) == strings.ToLower(name) {
+			if strings.EqualFold(trapper, name) {
 				s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
 				return
 			}
@@ -231,7 +300,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		name := rest
 		for i, trapper := range trappers {
-			if strings.ToLower(trapper) == strings.ToLower(name) {
+			if strings.EqualFold(trapper, name) {
 				trappers = append(trappers[:i], trappers[i+1:]...)
 				updateStatus(s)
 				saveTrappers()
@@ -248,8 +317,29 @@ func onReady(s *discordgo.Session, r *discordgo.Ready) {
 	updateStatus(s)
 }
 
-func main() {
+func generatePR2Avi(args [12]string) (*os.File, error) {
+	const bindir = "./pr2avi/Export/windows/bin/"
+	argstr := strings.Join(args[:], "_")
+	hash := md5.Sum([]byte(argstr))
+	avipath := bindir + hex.EncodeToString(hash[:]) + ".png"
 
+	// generate a new one if there's not a cached one
+	if _, err := os.Stat(avipath); os.IsNotExist(err) {
+		fmt.Println("generating pr2 avi", argstr)
+		cmd := exec.Command("./pr2avi.exe", argstr)
+		cmd.Dir = bindir
+		err := cmd.Run()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	fmt.Println(avipath)
+	f, err := os.Open(avipath)
+	return f, err
+}
+
+func main() {
 	rand.Seed(time.Now().Unix())
 	loadCfg()
 	initSheets()
@@ -268,41 +358,46 @@ func main() {
 	dg.AddHandler(onMessageCreate)
 	dg.AddHandler(onMessageReactionAdd)
 
+connect:
 	err = dg.Open()
 	if err != nil {
-		panic(err)
+		fmt.Println("dg.Open() failed: retrying in 60s")
+		<-time.After(time.Minute)
+		goto connect
 	}
 
-	go func() {
-		for t := range time.Tick(time.Minute) {
-			if dg == nil {
-				continue
-			}
-			if t.UTC().Weekday() == time.Monday {
-				h, m, _ := t.UTC().Clock()
-				switch h {
-				case 4:
-					if m == 10 {
-						dg.ChannelMessageSend(ltgeneralID, "🥲 ALORT! PR2 servers will restart in 2 hours!")
-					}
-				case 5:
-					if m == 10 {
-						dg.ChannelMessageSend(ltgeneralID, "<:PepeSad:496929351179436032> ALORT! PR2 servers will restart in 1 hour!")
-					}
-				case 6:
-					if m == 0 {
-						dg.ChannelMessageSend(ltgeneralID, "<:PepeKMS:748576081967317063> ALORT! PR2 servers will restart in 10 minutes!")
-					}
-				}
-
-			}
-		}
-	}()
+	go restartAlorter(dg)
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 
 	dg.Close()
+}
+
+func restartAlorter(dg *discordgo.Session) {
+	for t := range time.Tick(time.Minute) {
+		if dg == nil {
+			continue
+		}
+		if t.UTC().Weekday() == time.Monday {
+			h, m, _ := t.UTC().Clock()
+			switch h {
+			case 4:
+				if m == 10 {
+					dg.ChannelMessageSend(ltgeneralID, "🥲 ALORT! PR2 servers will restart in 2 hours!")
+				}
+			case 5:
+				if m == 10 {
+					dg.ChannelMessageSend(ltgeneralID, "<:PepeSad:496929351179436032> ALORT! PR2 servers will restart in 1 hour!")
+				}
+			case 6:
+				if m == 0 {
+					dg.ChannelMessageSend(ltgeneralID, "<:PepeKMS:748576081967317063> ALORT! PR2 servers will restart in 10 minutes!")
+				}
+			}
+
+		}
+	}
 }

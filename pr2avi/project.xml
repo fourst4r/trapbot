@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project
+	xmlns="http://lime.software/project/1.0.3"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://lime.software/project/1.0.3 http://lime.software/xsd/project-1.0.3.xsd">
+	
+	<meta title="pr2avi" package="org.openfl.samples.displayingabitmap" version="1.0.0" company="OpenFL" />
+	<app main="Main" path="Export" file="pr2avi" />
+	<window hidden="true" />
+	
+	<source path="Source" />
+	
+	<haxelib name="swf" version="git" />
+	<haxelib name="openfl" />
+	<haxelib name="format" />
+	
+	<assets path="Assets" rename="assets" />
+	<library name="pr2" path="assets/platform-racing-2-v167.swf" preload="true" generate="false" />
+
+</project>

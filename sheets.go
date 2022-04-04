@@ -47,7 +47,7 @@ func findUnbeatenAT(players []string) ([]string, error) {
 		if len(row) > 0 {
 			// fmt.Println("row:", row)
 			for _, player := range players {
-				if strings.ToLower(player) == strings.ToLower(row[0].(string)) {
+				if strings.EqualFold(player, row[0].(string)) {
 					// fmt.Printf("%d: %s\n", i+2, row[0])
 					found = append(found, player)
 					// wantRows = append(wantRows, i+2)
@@ -71,7 +71,7 @@ func findUnbeatenAT(players []string) ([]string, error) {
 		for _, p := range players {
 			missing := true
 			for _, f := range found {
-				if strings.ToLower(p) == strings.ToLower(f) {
+				if strings.EqualFold(p, f) {
 					missing = false
 				}
 			}
@@ -155,7 +155,7 @@ func findUnbeatenWP(players []string) ([]string, error) {
 		if len(row) > 0 {
 			// fmt.Println("row:", row)
 			for _, player := range players {
-				if strings.ToLower(player) == strings.ToLower(row[0].(string)) {
+				if strings.EqualFold(player, row[0].(string)) {
 					// fmt.Printf("%d: %s\n", i+2, row[0])
 					found = append(found, player)
 					wantRanges = append(wantRanges, fmt.Sprintf(readRangeWP, i+2, i+2))
@@ -169,7 +169,7 @@ func findUnbeatenWP(players []string) ([]string, error) {
 		for _, p := range players {
 			missing := true
 			for _, f := range found {
-				if strings.ToLower(p) == strings.ToLower(f) {
+				if strings.EqualFold(p, f) {
 					missing = false
 				}
 			}
