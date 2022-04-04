@@ -77,8 +77,6 @@ class Main extends Sprite {
 		body, bodyC1, bodyC2,
 		feet, feetC1, feetC2) {
 
-		hat++; // 1 is no hat for some reason here but it should be 0
-
 		mc.stop();
 
 		var anim = mc.get("standAnim");
