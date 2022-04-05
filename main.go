@@ -161,17 +161,16 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		exptorank := formatCommas(int64(pi.ExpToRank))
 		joined := "Age of Heroes"
 		if pi.RegisterDate != 0 {
-			joined = time.Unix(pi.RegisterDate, 0).UTC().Format(time.RFC822)
+			joined = fmt.Sprintf("<t:%d:f>", pi.RegisterDate)
 		}
-		active := time.Unix(pi.LoginDate, 0).UTC().Format(time.RFC822)
 		description := fmt.Sprintf("_%s_\n"+
 			"Group: %s\n"+
 			"Guild: %s\n"+
 			"Rank: %d\n"+
 			"Hats: %d\n"+
 			"Joined: %s\n"+
-			"Active: %s\n"+
-			"Exp: %s/%s (%d%%)", pi.Status, pi.GroupName(), pi.GuildName, pi.Rank, pi.Hats, joined, active, exppoints, exptorank, exppercent)
+			"Active: <t:%d:R>\n"+
+			"Exp: %s/%s (%d%%)", pi.Status, pi.GroupName(), pi.GuildName, pi.Rank, pi.Hats, joined, pi.LoginDate, exppoints, exptorank, exppercent)
 
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: "",
