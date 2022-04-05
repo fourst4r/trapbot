@@ -6,7 +6,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"math"
 	"math/rand"
@@ -156,11 +155,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		defer file.Close()
 
-		b, err := io.ReadAll(file)
-		if err != nil {
-			fmt.Println("Error occurred reading file: " + err.Error())
-		}
-
 		exp, _ := strconv.ParseFloat(pi.ExpPoints, 64)
 		exppercent := int(math.Floor(exp / float64(pi.ExpToRank) * 100))
 		exppoints := formatCommas(int64(exp))
@@ -185,7 +179,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 				{
 					Name:        "avi.png",
 					ContentType: "image/png",
-					Reader:      bytes.NewBuffer(b),
+					Reader:      file,
 				},
 			},
 			Embed: &discordgo.MessageEmbed{
