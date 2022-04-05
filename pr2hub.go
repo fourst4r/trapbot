@@ -43,6 +43,21 @@ type Player struct {
 	ExpToRank    int         `json:"exp_to_rank,omitempty"`
 }
 
+func (p *Player) GroupName() string {
+	var group string = "???"
+	switch p.Group {
+	case "0":
+		group = "Guest"
+	case "1":
+		group = "Member"
+	case "2":
+		group = "Mod"
+	case "3":
+		group = "Admin"
+	}
+	return group
+}
+
 type ArtifactHintModel struct {
 	Hint        string `json:"hint"`
 	FinderName  string `json:"finder_name"`

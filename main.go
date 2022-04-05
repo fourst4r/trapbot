@@ -8,11 +8,13 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"math/rand"
 	"os"
 	"os/exec"
 	"os/signal"
 	"sort"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -159,18 +161,14 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println("Error occurred reading file: " + err.Error())
 		}
 
-		var group string = "???"
-		switch pi.Group {
-		case "0":
-			group = "Guest"
-		case "1":
-			group = "Member"
-		case "2":
-			group = "Mod"
-		case "3":
-			group = "Admin"
+		exp, _ := strconv.ParseFloat(pi.ExpPoints, 64)
+		exppercent := int(math.Floor(exp / float64(pi.ExpToRank) * 100))
+		exppoints := formatCommas(int64(exp))
+		exptorank := formatCommas(int64(pi.ExpToRank))
+		joined := "Age of Heroes"
+		if pi.RegisterDate != 0 {
+			joined = time.Unix(pi.RegisterDate, 0).UTC().Format(time.RFC822)
 		}
-		joined := time.Unix(pi.RegisterDate, 0).UTC().Format(time.RFC822)
 		active := time.Unix(pi.LoginDate, 0).UTC().Format(time.RFC822)
 		description := fmt.Sprintf("_%s_\n"+
 			"Group: %s\n"+
@@ -178,7 +176,8 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"Rank: %d\n"+
 			"Hats: %d\n"+
 			"Joined: %s\n"+
-			"Active: %s\n", pi.Status, group, pi.GuildName, pi.Rank, pi.Hats, joined, active)
+			"Active: %s\n"+
+			"Exp: %s/%s (%d%%)", pi.Status, pi.GroupName(), pi.GuildName, pi.Rank, pi.Hats, joined, active, exppoints, exptorank, exppercent)
 
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: "",
@@ -398,6 +397,32 @@ func restartAlorter(dg *discordgo.Session) {
 				}
 			}
 
+		}
+	}
+}
+
+// https://stackoverflow.com/a/31046325/5860323
+func formatCommas(n int64) string {
+	in := strconv.FormatInt(n, 10)
+	numOfDigits := len(in)
+	if n < 0 {
+		numOfDigits-- // First character is the - sign (not a digit)
+	}
+	numOfCommas := (numOfDigits - 1) / 3
+
+	out := make([]byte, len(in)+numOfCommas)
+	if n < 0 {
+		in, out[0] = in[1:], '-'
+	}
+
+	for i, j, k := len(in)-1, len(out)-1, 0; ; i, j = i-1, j-1 {
+		out[j] = in[i]
+		if i == 0 {
+			return string(out)
+		}
+		if k++; k == 3 {
+			j, k = j-1, 0
+			out[j] = ','
 		}
 	}
 }
