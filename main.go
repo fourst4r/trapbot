@@ -166,11 +166,10 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		description := fmt.Sprintf("_%s_\n"+
 			"Group: %s\n"+
 			"Guild: %s\n"+
-			"Rank: %d\n"+
+			"Rank: %d (%s/%s - %d%%) \n"+
 			"Hats: %d\n"+
 			"Joined: %s\n"+
-			"Active: <t:%d:R>\n"+
-			"Exp: %s/%s (%d%%)", pi.Status, pi.GroupName(), pi.GuildName, pi.Rank, pi.Hats, joined, pi.LoginDate, exppoints, exptorank, exppercent)
+			"Active: <t:%d:R>\n", pi.Status, pi.GroupName(), pi.GuildName, pi.Rank, exppoints, exptorank, exppercent, pi.Hats, joined, pi.LoginDate)
 
 		s.ChannelMessageSendComplex(m.ChannelID, &discordgo.MessageSend{
 			Content: "",
@@ -188,6 +187,16 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			},
 		})
 
+	case "fah":
+		const teamJiggmin = "143016"
+		underscoredUser := strings.ReplaceAll(rest, " ", "_")
+		fah, err := FAHStats(underscoredUser, teamJiggmin)
+		if err != nil {
+			fmt.Println("error getting fah stats:", err)
+			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+			return
+		}
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%s has %s points = %d tokens", rest, formatCommas(int64(fah.Contributed)), fah.NumTokens()))
 	case "pick":
 		trapper := randomTrapper()
 		msg, err := s.ChannelMessageSend(m.ChannelID, trapper)
@@ -261,14 +270,26 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			s.ChannelMessageSend(m.ChannelID, content)
 		}
-	case "doc":
+	case "doc", "docs":
 		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 			Description: "[AT information](https://docs.google.com/document/d/16vwNMfUOGWEGRDTV6IjM_QeeAM5Uh3QXgTVQ6vi0w5w/edit?usp=sharing) // [AT leaderboard](https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing)\n" +
 				"[WP information](https://docs.google.com/document/d/1KJx5Pha-rf5aNmvDBV_n_O7JUu8AUZkmaeHIRACeoQ4/edit) // [WP leaderboard](https://docs.google.com/spreadsheets/d/1DTquUKV-ayLsKU64P9w9Lcs2oddDrpiGjcOfsKsPiYk/)",
 		})
+	case "version":
+		version, err := Version()
+		if err != nil {
+			fmt.Println("error checking version.txt:", err)
+			s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+			return
+		}
+		timestr := time.UnixMilli(int64(version.Time)).Format(time.UnixDate)
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%s @ %s", version.Version, timestr))
 	case "help":
-		s.ChannelMessageSend(m.ChannelID, `!pick, !has <name>, !list, !at <name>,<name>, !wp <name>,<name>, !doc`)
+		s.ChannelMessageSend(m.ChannelID, `!view, !pick, !has <name>, !list, !at <name>,<name>, !wp <name>,<name>, !doc`)
 	case "reload":
+		if !isEditor(m.Author.ID) {
+			return
+		}
 		loadCfg()
 		s.MessageReactionAdd(m.ChannelID, m.ID, successEmoji)
 	case "add":
@@ -305,6 +326,11 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func onReady(s *discordgo.Session, r *discordgo.Ready) {
+	fmt.Print("guilds: (")
+	for _, g := range r.Guilds {
+		fmt.Print(g.Name, ",")
+	}
+	fmt.Print(")")
 	// https://discordapp.com/developers/docs/topics/gateway#resuming
 	updateStatus(s)
 }

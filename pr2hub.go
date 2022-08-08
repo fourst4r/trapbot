@@ -91,6 +91,12 @@ type LoginRespModel struct {
 	UserID     int    `json:"userId"`
 }
 
+type VersionInfo struct {
+	Version string `json:"version"`
+	Time    int    `json:"time"`
+	URL     string `json:"url"`
+}
+
 func Login(i, version string) (*LoginRespModel, error) {
 	form := url.Values{}
 	form.Set("i", i)
@@ -172,6 +178,22 @@ func ServerStatus() ([]Server, error) {
 	// 	return nil, err
 	// }
 	return svrs, nil
+}
+
+func Version() (*VersionInfo, error) {
+	var version VersionInfo
+
+	jsonStr, err := getString("https://pr2hub.com/version.txt")
+	if err != nil {
+		return nil, err
+	}
+
+	err = json.Unmarshal([]byte(jsonStr), &version)
+	if err != nil {
+		return nil, err
+	}
+
+	return &version, nil
 }
 
 func getString(url string) (string, error) {
