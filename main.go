@@ -106,16 +106,14 @@ func escapeFormatting(s string) string {
 }
 
 func updateStatus(s *discordgo.Session) {
-	s.UpdateStatus(0, fmt.Sprintf("with %d searches", len(trappers)))
+	s.UpdateGameStatus(0, fmt.Sprintf("with %d searches", len(trappers)))
 }
 
 func onMessageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-	// fmt.Printf("id=(%s) name=(%s) apiname=(%s)\n", m.Emoji.ID, m.Emoji.Name, m.Emoji.APIName())
 	if m.UserID == s.State.User.ID || m.Emoji.Name != redoEmoji {
 		return
 	}
 	s.ChannelMessageEdit(m.ChannelID, m.MessageID, randomTrapper())
-	// s.MessageReactionRemove(m.ChannelID, m.MessageID, m.Emoji.Name, m.UserID)
 }
 
 func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
@@ -132,6 +130,15 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	fmt.Printf("command=%s args=%v\n", command, args)
 	switch command {
+	case "makecountdown":
+		ts, err := time.Parse(time.RFC822Z, rest)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, err.Error())
+			return
+		}
+		unixts := ts.Unix()
+		cd := fmt.Sprintf("<t:%d:R> `<t:%d:R>`", unixts, unixts)
+		s.ChannelMessageSend(m.ChannelID, cd)
 	case "view":
 		pi, err := PlayerInfo(rest)
 		if err != nil {
@@ -379,7 +386,7 @@ func main() {
 connect:
 	err = dg.Open()
 	if err != nil {
-		fmt.Println("dg.Open() failed: retrying in 60s")
+		fmt.Println("dg.Open() failed: retrying in 60s:", err)
 		<-time.After(time.Minute)
 		goto connect
 	}
