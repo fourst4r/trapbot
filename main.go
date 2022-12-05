@@ -208,7 +208,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		trapper := randomTrapper()
 		msg, err := s.ChannelMessageSend(m.ChannelID, trapper)
 		if err != nil {
-			fmt.Println("failed to send message in", m.ChannelID, ":", trapper)
+			fmt.Println("failed to send message in", m.ChannelID, ":", trapper, err)
 			return
 		}
 		err = s.MessageReactionAdd(msg.ChannelID, msg.ID, redoEmoji)
