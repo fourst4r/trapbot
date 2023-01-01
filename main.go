@@ -295,7 +295,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			if err != nil {
 				fmt.Println("err sending temp message:", err)
 			}
-			//s.ChannelMessageSend(m.ChannelID, content)
 		}
 	case "doc", "docs":
 		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
