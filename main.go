@@ -22,15 +22,16 @@ import (
 )
 
 const (
-	ltgeneralID      = "449529653871247373"
-	trappersFile     = "trappers.txt"
-	exclusionsATFile = "exclusionsat.txt"
-	exclusionsWPFile = "exclusionswp.txt"
-	freeFile         = "freealts.txt"
-	prefix           = "!"
-	redoEmoji        = "♻"
-	successEmoji     = "☑"
-	failureEmoji     = "❗"
+	ltgeneralID         = "449529653871247373"
+	trappersFile        = "trappers.txt"
+	exclusionsATFile    = "exclusionsat.txt"
+	exclusionsWPFile    = "exclusionswp.txt"
+	freeFile            = "freealts.txt"
+	prefix              = "!"
+	redoEmoji           = "♻"
+	successEmoji        = "☑"
+	failureEmoji        = "❗"
+	tempMessageDuration = time.Hour * 2
 )
 
 var (
@@ -107,6 +108,21 @@ func escapeFormatting(s string) string {
 
 func updateStatus(s *discordgo.Session) {
 	s.UpdateGameStatus(0, fmt.Sprintf("with %d searches", len(trappers)))
+}
+
+func sendTempMessage(s *discordgo.Session, channelID string, content string) error {
+	message, err := s.ChannelMessageSend(channelID, content)
+	if err != nil {
+		return err
+	}
+	messageID := message.ID
+	time.AfterFunc(tempMessageDuration, func() {
+		err := s.ChannelMessageDelete(channelID, messageID)
+		if err != nil {
+			fmt.Println("err deleting message:", err)
+		}
+	})
+	return nil
 }
 
 func onMessageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
@@ -275,7 +291,11 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			buf.WriteString(strings.Join(unbeaten, "\r\n"))
 			s.ChannelFileSend(m.ChannelID, "unbeaten.txt", &buf)
 		} else {
-			s.ChannelMessageSend(m.ChannelID, content)
+			err = sendTempMessage(s, m.ChannelID, content)
+			if err != nil {
+				fmt.Println("err sending temp message:", err)
+			}
+			//s.ChannelMessageSend(m.ChannelID, content)
 		}
 	case "doc", "docs":
 		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
