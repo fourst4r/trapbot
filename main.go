@@ -23,6 +23,7 @@ import (
 
 const (
 	ltgeneralID         = "449529653871247373"
+	ltbotchannelID      = "1065054917435330570"
 	trappersFile        = "trappers.txt"
 	exclusionsATFile    = "exclusionsat.txt"
 	exclusionsWPFile    = "exclusionswp.txt"
@@ -110,19 +111,13 @@ func updateStatus(s *discordgo.Session) {
 	s.UpdateGameStatus(0, fmt.Sprintf("with %d searches", len(trappers)))
 }
 
-func sendTempMessage(s *discordgo.Session, channelID string, content string) error {
-	message, err := s.ChannelMessageSend(channelID, content)
-	if err != nil {
-		return err
-	}
-	messageID := message.ID
+func deleteMessageAfter(s *discordgo.Session, channelID string, messageID string, duration time.Duration) {
 	time.AfterFunc(tempMessageDuration, func() {
 		err := s.ChannelMessageDelete(channelID, messageID)
 		if err != nil {
 			fmt.Println("err deleting message:", err)
 		}
 	})
-	return nil
 }
 
 func onMessageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
@@ -255,7 +250,7 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		s.ChannelFileSend(m.ChannelID, trappersFile, file)
 	case "at", "wp":
-		if m.ChannelID != "487193614598930447" {
+		if m.ChannelID != ltbotchannelID {
 			s.ChannelMessageSend(m.ChannelID, "This command is spammy, use #bot")
 			return
 		}
@@ -285,17 +280,19 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			content = strings.Join(unbeaten, ", ")
 		}
+		var message *discordgo.Message
 		if len(content) > 2000 {
 			// content = content[:1997] + "..."
 			var buf bytes.Buffer
 			buf.WriteString(strings.Join(unbeaten, "\r\n"))
-			s.ChannelFileSend(m.ChannelID, "unbeaten.txt", &buf)
+			message, err = s.ChannelFileSend(m.ChannelID, "unbeaten.txt", &buf)
 		} else {
-			err = sendTempMessage(s, m.ChannelID, content)
-			if err != nil {
-				fmt.Println("err sending temp message:", err)
-			}
+			message, err = s.ChannelMessageSend(m.ChannelID, content)
 		}
+		if err != nil {
+			fmt.Println("failed to send message", err)
+		}
+		deleteMessageAfter(s, m.ChannelID, message.ID, tempMessageDuration)
 	case "doc", "docs":
 		s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 			Description: "[AT information](https://docs.google.com/document/d/16vwNMfUOGWEGRDTV6IjM_QeeAM5Uh3QXgTVQ6vi0w5w/edit?usp=sharing) // [AT leaderboard](https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing)\n" +
