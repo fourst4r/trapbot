@@ -9,8 +9,10 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"sort"
 	"strings"
 
+	"github.com/lithammer/fuzzysearch/fuzzy"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/sheets/v4"
@@ -34,39 +36,109 @@ var (
 	spaceRgx = regexp.MustCompile(`\s\s+`)
 )
 
+func findSimilarName(input string, possible []interface{}) {
+
+}
+
+const (
+	TeamNone = iota
+	TeamRed
+	TeamBlue
+)
+
+type sheetPlayer struct {
+	row  int
+	name string
+	team int
+}
+
+func extractSheetPlayers(vrange *sheets.ValueRange) []sheetPlayer {
+	r := make([]sheetPlayer, len(vrange.Values))
+	for i, row := range vrange.Values {
+		if len(row) > 0 {
+			team := TeamNone
+			if len(row) > 2 {
+				switch row[2] {
+				case "R":
+					team = TeamRed
+				case "B":
+					team = TeamBlue
+				}
+			}
+			sp := sheetPlayer{
+				row:  i,
+				name: row[0].(string),
+				team: team,
+			}
+			r = append(r, sp)
+		}
+	}
+	return r
+}
+
+func matchName(expr string, possible []sheetPlayer) (sheetPlayer, bool) {
+	// regex search
+	for _, p := range possible {
+		matched, _ := regexp.MatchString("(?i)"+p.name, expr)
+		if matched {
+			return p, true
+		}
+	}
+
+	// fuzzy search
+	playerNames := make([]string, len(possible))
+	for i := range possible {
+		playerNames[i] = possible[i].name
+	}
+
+	matchOptions := strings.Split(expr, "|")
+	for _, option := range matchOptions {
+		ranks := fuzzy.RankFindFold(option, playerNames)
+		if ranks.Len() != 0 {
+			sort.Sort(ranks)
+			match := ranks[0]
+			return possible[match.OriginalIndex], true
+		}
+	}
+
+	// no match found :(
+	return sheetPlayer{}, false
+}
+
 func findUnbeatenAT(players []string) ([]string, error) {
 	playersResp, err := srv.Spreadsheets.Values.Get(spreadsheetATID, playerRangeAT).Do()
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve players from sheet: %v", err)
 	}
+	sheetPlayers := extractSheetPlayers(playersResp)
 
 	wantRanges := []string{fmt.Sprintf(readRangeAT, 1, 1)}
 	found := []string{}
 	var hasRed, hasBlue bool
-	for i, row := range playersResp.Values {
-		if len(row) > 0 {
-			// fmt.Println("row:", row)
-			for _, player := range players {
-				if strings.EqualFold(player, row[0].(string)) {
-					// fmt.Printf("%d: %s\n", i+2, row[0])
-					found = append(found, player)
-					// wantRows = append(wantRows, i+2)
-					wantRanges = append(wantRanges, fmt.Sprintf(readRangeAT, i+2, i+2))
-					if len(row) > 2 {
-						switch row[2] {
-						case "R":
-							hasRed = true
-						case "B":
-							hasBlue = true
-						}
-					}
 
-				}
+	for _, player := range players {
+
+		// matched := strings.EqualFold(player, sheetPlayer.name)
+		match, matched := matchName(player, sheetPlayers)
+		fmt.Printf("matched %s with %s\n", player, match.name)
+
+		if matched {
+			found = append(found, player)
+			wantRow := match.row + 2 // +2 to skip name and team columns
+			wantRanges = append(wantRanges, fmt.Sprintf(readRangeAT, wantRow, wantRow))
+
+			switch match.team {
+			case TeamRed:
+				hasRed = true
+			case TeamBlue:
+				hasBlue = true
 			}
 		}
 	}
 
-	if len(found) != len(players) {
+	searchFailed := len(found) != len(players)
+	if searchFailed {
+		// construct an informative error message
 		notfound := []string{}
 		for _, p := range players {
 			missing := true
@@ -75,10 +147,12 @@ func findUnbeatenAT(players []string) ([]string, error) {
 					missing = false
 				}
 			}
+
 			if missing {
 				notfound = append(notfound, p)
 			}
 		}
+
 		return nil, fmt.Errorf("the following names were not found on the spreadsheet: %s.\n<https://docs.google.com/spreadsheets/d/1xvR1BOLcFEL42wtplSbnTRVh-y2FuOkjp-1bDVFJZJo/edit?usp=sharing>", strings.Join(notfound, ", "))
 	}
 
@@ -143,6 +217,7 @@ colLoop:
 	}
 	return unbeaten, nil
 }
+
 func findUnbeatenWP(players []string) ([]string, error) {
 	playersResp, err := srv.Spreadsheets.Values.Get(spreadsheetWPID, playerRangeWP).Do()
 	if err != nil {
