@@ -36,10 +36,6 @@ var (
 	spaceRgx = regexp.MustCompile(`\s\s+`)
 )
 
-func findSimilarName(input string, possible []interface{}) {
-
-}
-
 const (
 	TeamNone = iota
 	TeamRed
@@ -77,28 +73,33 @@ func extractSheetPlayers(vrange *sheets.ValueRange) []sheetPlayer {
 }
 
 func matchName(expr string, possible []sheetPlayer) (sheetPlayer, bool) {
-	// regex search
+	aliases := make([][]string, len(possible))
+	for i, p := range possible {
+		aliases[i] = strings.Split(p.name, "|")
+	}
+
+	// simple alias search
 	for _, p := range possible {
-		matched, _ := regexp.MatchString("(?i)"+p.name, expr)
-		if matched {
-			return p, true
+		for _, a := range aliases {
+			for _, alias := range a {
+				if strings.EqualFold(alias, expr) {
+					return p, true
+				}
+			}
 		}
 	}
 
 	// fuzzy search
 	playerNames := make([]string, len(possible))
 	for i := range possible {
-		playerNames[i] = possible[i].name
+		playerNames[i] = aliases[i][0] // only check the first alias
 	}
 
-	matchOptions := strings.Split(expr, "|")
-	for _, option := range matchOptions {
-		ranks := fuzzy.RankFindFold(option, playerNames)
-		if ranks.Len() != 0 {
-			sort.Sort(ranks)
-			match := ranks[0]
-			return possible[match.OriginalIndex], true
-		}
+	ranks := fuzzy.RankFindFold(expr, playerNames)
+	if ranks.Len() != 0 {
+		sort.Sort(ranks)
+		match := ranks[len(ranks)-1]
+		return possible[match.OriginalIndex], true
 	}
 
 	// no match found :(
