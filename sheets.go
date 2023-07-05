@@ -9,10 +9,8 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
 
-	"github.com/lithammer/fuzzysearch/fuzzy"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/sheets/v4"
@@ -51,7 +49,7 @@ type sheetPlayer struct {
 func extractSheetPlayers(vrange *sheets.ValueRange) []sheetPlayer {
 	r := make([]sheetPlayer, len(vrange.Values))
 	for i, row := range vrange.Values {
-		if len(row) > 0 {
+		if len(row) > 0 && len(row[0].(string)) > 0 {
 			team := TeamNone
 			if len(row) > 2 {
 				switch row[2] {
@@ -66,7 +64,7 @@ func extractSheetPlayers(vrange *sheets.ValueRange) []sheetPlayer {
 				name: row[0].(string),
 				team: team,
 			}
-			r = append(r, sp)
+			r[i] = sp
 		}
 	}
 	return r
@@ -79,28 +77,37 @@ func matchName(expr string, possible []sheetPlayer) (sheetPlayer, bool) {
 	}
 
 	// simple alias search
-	for _, p := range possible {
-		for _, a := range aliases {
-			for _, alias := range a {
-				if strings.EqualFold(alias, expr) {
-					return p, true
-				}
+	for i, a := range aliases {
+		for _, alias := range a {
+			if strings.EqualFold(alias, expr) {
+				return possible[i], true
 			}
 		}
 	}
 
 	// fuzzy search
-	playerNames := make([]string, len(possible))
-	for i := range possible {
-		playerNames[i] = aliases[i][0] // only check the first alias
-	}
+	// playerNames := make([]string, len(possible))
+	// for i := range possible {
+	// 	playerNames[i] = aliases[i][0] // only check the first alias
+	// }
 
-	ranks := fuzzy.RankFindFold(expr, playerNames)
-	if ranks.Len() != 0 {
-		sort.Sort(ranks)
-		match := ranks[len(ranks)-1]
-		return possible[match.OriginalIndex], true
-	}
+	// var best float32 = math.MaxFloat32
+	// var bestIdx int
+	// for i, pname := range playerNames {
+	// 	dist := float32(levenshtein.ComputeDistance(pname, expr))
+	// 	threshold := 0.2 * float32(len(expr))
+	// 	if dist <= threshold && dist < best {
+	// 		best = dist
+	// 		if dist == 0 {
+	// 			return possible[i], true
+	// 		}
+	// 		bestIdx = i
+	// 	}
+	// }
+
+	// if best < math.MaxFloat32 {
+	// 	return possible[bestIdx], true
+	// }
 
 	// no match found :(
 	return sheetPlayer{}, false
@@ -224,19 +231,19 @@ func findUnbeatenWP(players []string) ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve players from sheet: %v", err)
 	}
+	sheetPlayers := extractSheetPlayers(playersResp)
 
 	wantRanges := []string{fmt.Sprintf(readRangeWP, 1, 1)}
 	found := []string{}
-	for i, row := range playersResp.Values {
-		if len(row) > 0 {
-			// fmt.Println("row:", row)
-			for _, player := range players {
-				if strings.EqualFold(player, row[0].(string)) {
-					// fmt.Printf("%d: %s\n", i+2, row[0])
-					found = append(found, player)
-					wantRanges = append(wantRanges, fmt.Sprintf(readRangeWP, i+2, i+2))
-				}
-			}
+
+	for _, player := range players {
+		match, matched := matchName(player, sheetPlayers)
+		fmt.Printf("matched %s with %s\n", player, match.name)
+
+		if matched {
+			found = append(found, player)
+			wantRow := match.row + 2 // +2 to skip name and team columns
+			wantRanges = append(wantRanges, fmt.Sprintf(readRangeWP, wantRow, wantRow))
 		}
 	}
 
