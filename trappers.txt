@@ -9,7 +9,6 @@
 -Ice Dragon-
 -Inspired-
 -Lightsidenemo-
--NeonStrike-
 -Optiplex-
 -ParadoX-
 -ProMan-
@@ -128,6 +127,7 @@ FJD
 Fadious Dragon
 Fallen Warrior
 Family
+Fang
 Fatal Dragon
 Fatal Shadow X
 FatalGlory
@@ -260,6 +260,7 @@ Poisonous Apple
 Popeye
 Prince Ande
 Prince Legacy
+Project Well
 Project46
 R-R-Ryan
 RSFreak
@@ -303,7 +304,6 @@ SoulSlasher
 Soulmiddes
 SoyaS
 Spiritual
-Spritual
 StarWars
 SwiftHawk
 TTnL
@@ -321,6 +321,7 @@ Tib
 Tibere
 Tortank
 Toxic Titan
+Train Guy
 Trap ChallengeR
 TrapCrew
 Trapp Master
@@ -388,6 +389,7 @@ iGodShark
 iOwnedYouGood
 iTzFail
 iTzMexicoxD
+iTzR3BK7xD
 icecube606
 jani00
 janoo2000
