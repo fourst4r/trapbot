@@ -16,7 +16,7 @@ type Player struct {
 	Error        string      `json:"error,omitempty"`
 	Rank         int         `json:"rank,omitempty"`
 	Hats         int         `json:"hats,omitempty"`
-	Group        string      `json:"group,omitempty"`
+	Group        int         `json:"group,omitempty"`
 	Friend       int         `json:"friend,omitempty"`
 	Ignored      int         `json:"ignored,omitempty"`
 	Following    int         `json:"following,omitempty"`
@@ -46,13 +46,13 @@ type Player struct {
 func (p *Player) GroupName() string {
 	var group string = "???"
 	switch p.Group {
-	case "0":
+	case 0:
 		group = "Guest"
-	case "1":
+	case 1:
 		group = "Member"
-	case "2":
+	case 2:
 		group = "Mod"
-	case "3":
+	case 3:
 		group = "Admin"
 	}
 	return group
