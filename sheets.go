@@ -206,7 +206,7 @@ colLoop:
 			// fmt.Printf("(%d) lvl: %s\n", i, v)
 			// }
 
-			if col < len(valueRange.Values[0]) && valueRange.Values[0][col].(string) != "" {
+			if len(valueRange.Values) > 0 && col < len(valueRange.Values[0]) && valueRange.Values[0][col].(string) != "" {
 				beat = true
 				break
 			}
@@ -283,7 +283,7 @@ colLoop:
 			// fmt.Printf("(%d) lvl: %s\n", i, v)
 			// }
 
-			if col < len(valueRange.Values[0]) && valueRange.Values[0][col].(string) != "" {
+			if len(valueRange.Values) > 0 && col < len(valueRange.Values[0]) && valueRange.Values[0][col].(string) != "" {
 				beat = true
 				break
 			}
