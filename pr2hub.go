@@ -23,23 +23,23 @@ type Player struct {
 	Status       string      `json:"status,omitempty"`
 	LoginDate    int64       `json:"loginDate,omitempty"`
 	RegisterDate int64       `json:"registerDate,omitempty"`
-	Hat          string      `json:"hat,omitempty"`
-	Head         string      `json:"head,omitempty"`
-	Body         string      `json:"body,omitempty"`
-	Feet         string      `json:"feet,omitempty"`
-	HatColor     string      `json:"hatColor,omitempty"`
-	HeadColor    string      `json:"headColor,omitempty"`
-	BodyColor    string      `json:"bodyColor,omitempty"`
-	FeetColor    string      `json:"feetColor,omitempty"`
-	GuildID      string      `json:"guildId,omitempty"`
+	Hat          interface{} `json:"hat,omitempty"`
+	Head         interface{} `json:"head,omitempty"`
+	Body         interface{} `json:"body,omitempty"`
+	Feet         interface{} `json:"feet,omitempty"`
+	HatColor     interface{} `json:"hatColor,omitempty"`
+	HeadColor    interface{} `json:"headColor,omitempty"`
+	BodyColor    interface{} `json:"bodyColor,omitempty"`
+	FeetColor    interface{} `json:"feetColor,omitempty"`
+	GuildID      interface{} `json:"guildId,omitempty"`
 	GuildName    string      `json:"guildName,omitempty"`
 	Name         string      `json:"name,omitempty"`
-	UserID       string      `json:"userId,omitempty"`
+	UserID       interface{} `json:"userId,omitempty"`
 	HatColor2    interface{} `json:"hatColor2,omitempty"`
 	HeadColor2   interface{} `json:"headColor2,omitempty"`
 	BodyColor2   interface{} `json:"bodyColor2,omitempty"`
 	FeetColor2   interface{} `json:"feetColor2,omitempty"`
-	ExpPoints    string      `json:"exp_points,omitempty"`
+	ExpPoints    float64     `json:"exp_points,omitempty"`
 	ExpToRank    int         `json:"exp_to_rank,omitempty"`
 }
 

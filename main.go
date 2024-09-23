@@ -161,10 +161,10 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 		parts := [12]string{
-			pi.Hat, pi.HatColor, fmt.Sprint(pi.HatColor2),
-			pi.Head, pi.HeadColor, fmt.Sprint(pi.HeadColor2),
-			pi.Body, pi.BodyColor, fmt.Sprint(pi.BodyColor2),
-			pi.Feet, pi.FeetColor, fmt.Sprint(pi.FeetColor2),
+			fmt.Sprint(pi.Hat), fmt.Sprint(pi.HatColor), fmt.Sprint(pi.HatColor2),
+			fmt.Sprint(pi.Head), fmt.Sprint(pi.HeadColor), fmt.Sprint(pi.HeadColor2),
+			fmt.Sprint(pi.Body), fmt.Sprint(pi.BodyColor), fmt.Sprint(pi.BodyColor2),
+			fmt.Sprint(pi.Feet), fmt.Sprint(pi.FeetColor), fmt.Sprint(pi.FeetColor2),
 		}
 
 		file, err := generatePR2Avi(parts)
@@ -173,7 +173,8 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 		defer file.Close()
 
-		exp, _ := strconv.ParseFloat(pi.ExpPoints, 64)
+		// exp, _ := strconv.ParseFloat(pi.ExpPoints, 64)
+		exp := pi.ExpPoints
 		exppercent := int(math.Floor(exp / float64(pi.ExpToRank) * 100))
 		exppoints := formatCommas(int64(exp))
 		exptorank := formatCommas(int64(pi.ExpToRank))
