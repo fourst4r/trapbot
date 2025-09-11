@@ -309,7 +309,11 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		timestr := time.UnixMilli(int64(version.Time)).Format(time.UnixDate)
 		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("%s @ %s", version.Version, timestr))
 	case "help":
-		s.ChannelMessageSend(m.ChannelID, `!view, !pick, !has <name>, !list, !at <name>,<name>, !wp <name>,<name>, !doc`)
+		help := `!view, !pick, !has <name>, !list, !at <name>,<name>, !wp <name>,<name>, !doc`
+		if isEditor(m.Author.ID) {
+			help += ", !add <trapmaker>, !remove <trapmaker>, !givepart <part-id> <part-types> <usernames>"
+		}
+		s.ChannelMessageSend(m.ChannelID, help)
 	case "reload":
 		if !isEditor(m.Author.ID) {
 			return
@@ -346,6 +350,25 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		}
 		s.MessageReactionAdd(m.ChannelID, m.ID, failureEmoji)
+	case "givepart":
+		if !isEditor(m.Author.ID) {
+			return
+		}
+		parts := strings.SplitN(rest, " ", 3)
+		if len(parts) != 3 {
+			s.ChannelMessageSend(m.ChannelID, "Usage: !givepart <part id> <part types> <usernames>")
+			return
+		}
+		partID := parts[0]
+		partTypes := strings.Split(parts[1], ",")
+		usernames := strings.Split(parts[2], ",")
+		fmt.Println("giving part", partID, "types", partTypes, "to", usernames)
+		resp, err := GivePart(usernames, partTypes, partID)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "Error giving part: "+err.Error())
+			return
+		}
+		s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("Gave part, response: %+v", resp))
 	}
 }
 

@@ -196,6 +196,40 @@ func Version() (*VersionInfo, error) {
 	return &version, nil
 }
 
+func GivePart(usernames []string, partTypes []string, partID string) (map[string]interface{}, error) {
+	form := url.Values{}
+	form.Add("usernames", strings.Join(usernames, ","))
+	form.Add("part_types", strings.Join(partTypes, ","))
+	form.Add("part_id", partID)
+
+	postData := strings.NewReader(form.Encode())
+	req, err := http.NewRequest(http.MethodPost, "http://bestestgameserver.ddns.net:8080/api/award_part_fast.php", postData)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("X-API-TOKEN", APIToken)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var j map[string]interface{}
+	err = json.Unmarshal(body, &j)
+	if err != nil {
+		return nil, err
+	}
+
+	return j, err
+}
+
 func getString(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
